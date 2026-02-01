@@ -14,9 +14,7 @@ trim() {
 # Print header
 print_header() {
     clear
-    echo -e "${CYAN}╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║${NC}          ${BOLD}🤖 Git-AI Manager${NC} ${DIM}v${VERSION}${NC}                            ${CYAN}║${NC}"
-    echo -e "${CYAN}╚══════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "${BOLD}🤖 Git-AI${NC} ${DIM}v${VERSION}${NC}"
     echo ""
 }
 

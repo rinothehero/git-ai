@@ -29,16 +29,14 @@ get_menu_label() {
 # Show interactive menu
 show_menu() {
     local sid=$(get_session_id)
-    local status="${RED}○${NC}"
-    [ -n "$sid" ] && status="${GREEN}●${NC}"
+    local ai_status="${RED}○${NC}"
+    [ -n "$sid" ] && ai_status="${GREEN}●${NC}"
 
-    echo -e "  ${BOLD}Quick Actions${NC}                          ${BOLD}AI Actions${NC} $status              ${BOLD}Workflow${NC}"
-    echo -e "  ${DIM}─────────────────────────────────────────────────────────────────────────────${NC}"
-    echo -e "   ${BOLD}1${NC} Stage All    ${BOLD}4${NC} Stash 📋   ${BOLD}7${NC} Log       ${BOLD}i${NC} Init AI       ${BOLD}v${NC} Review       ${BOLD}f${NC} Finish"
-    echo -e "   ${BOLD}2${NC} Unstage     ${BOLD}5${NC} Branch     ${BOLD}8${NC} Diff      ${BOLD}c${NC} AI Commit"
-    echo -e "   ${BOLD}3${NC} Uncommit    ${BOLD}6${NC} Push       ${BOLD}9${NC} ${RED}Discard${NC}"
-    echo -e "  ${DIM}─────────────────────────────────────────────────────────────────────────────${NC}"
-    echo -e "   ${BOLD}r${NC} Refresh     ${BOLD}q${NC} Quit       ${BOLD}?${NC} Help"
+    echo -e "${BOLD}Quick${NC}                    ${BOLD}AI${NC} $ai_status       ${BOLD}More${NC}"
+    echo -e "${DIM}────────────────────────────────────${NC}"
+    echo -e "${BOLD}1${NC}Stage ${BOLD}4${NC}Stash ${BOLD}7${NC}Log  ${BOLD}i${NC}Init ${BOLD}v${NC}Review ${BOLD}f${NC}Finish"
+    echo -e "${BOLD}2${NC}Unst  ${BOLD}5${NC}Branch ${BOLD}8${NC}Diff ${BOLD}c${NC}Commit         ${BOLD}r${NC}Refresh"
+    echo -e "${BOLD}3${NC}Uncom ${BOLD}6${NC}Push  ${BOLD}9${NC}${RED}Del${NC}                ${BOLD}q${NC}Quit"
     echo ""
 }
 

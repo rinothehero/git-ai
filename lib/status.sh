@@ -15,38 +15,45 @@ show_status() {
     # Header line: Session | Branch | Type
     local session_display=""
     if [ -n "$sid" ]; then
-        local short_sid="${sid:0:8}"
-        session_display="${GREEN}●${NC} Session ${DIM}#${short_sid}${NC}"
+        local short_sid="${sid:0:6}"
+        session_display="${GREEN}●${NC} ${DIM}#${short_sid}${NC}"
     else
-        session_display="${RED}○${NC} ${DIM}No Session${NC}"
+        session_display="${RED}○${NC}"
     fi
 
     local type_display=""
     case "$branch_type" in
-        "temporary") type_display="${YELLOW}⚗ Temp${NC}" ;;
-        "feature")   type_display="${GREEN}⚙ Feature${NC}" ;;
-        "main")      type_display="${CYAN}★ Main${NC}" ;;
-        *)           type_display="${DIM}? Unknown${NC}" ;;
+        "temporary") type_display="${YELLOW}⚗${NC}" ;;
+        "feature")   type_display="${GREEN}⚙${NC}" ;;
+        "main")      type_display="${CYAN}★${NC}" ;;
+        *)           type_display="${DIM}?${NC}" ;;
     esac
 
-    echo -e "  $session_display  ${DIM}│${NC}  ${BLUE}⎇${NC} ${BOLD}$branch${NC}  ${DIM}│${NC}  $type_display"
-    [ "$branch_type" == "temporary" ] && echo -e "  ${DIM}└─ Parent: $parent${NC}"
+    echo -e "$session_display ${DIM}│${NC} ${BLUE}⎇${NC}${BOLD}$branch${NC} ${DIM}│${NC} $type_display"
 
     echo ""
 
-    # Git Graph
-    echo -e "  ${BOLD}${CYAN}┌─ Git Graph ─────────────────────────────────────────────────────────┐${NC}"
+    # Git Graph (compact with truncated messages)
+    local term_width=${COLUMNS:-$(tput cols 2>/dev/null || echo 80)}
+    local max_msg_len=$((term_width - 15))  # Reserve space for graph + hash
+    [ "$max_msg_len" -lt 20 ] && max_msg_len=20
 
-    git log --graph --all -10 \
+    echo -e "${DIM}┌ Graph ───────────────────────────┐${NC}"
+    git log --graph --all -5 \
         --color=always \
         --pretty=format:'%C(yellow)%h%C(reset)%C(auto)%d%C(reset) %s' \
         2>/dev/null | \
-    sed "s/\*/●/g; s/^/  \x1b[0;36m│\x1b[0m /"
-
-    echo ""
-    echo -e "  ${CYAN}│${NC}  ${DIM}⋮${NC}"
-    echo -e "  ${BOLD}${CYAN}└──────────────────────────────────────────────────────────────────────┘${NC}"
-
+    sed "s/\*/●/g" | \
+    while IFS= read -r line; do
+        # Truncate commit message if too long
+        if [ "${#line}" -gt "$term_width" ]; then
+            echo "${line:0:$((term_width-3))}..."
+        else
+            echo "$line"
+        fi
+    done | \
+    sed "s/^/${DIM}│${NC} /" | head -5
+    echo -e "${DIM}└──────────────────────────────────┘${NC}"
     echo ""
 
     # File status (compact)
@@ -57,32 +64,23 @@ show_status() {
     if [ -n "$staged" ] || [ -n "$unstaged" ] || [ -n "$untracked" ]; then
         if [ -n "$staged" ]; then
             local cnt=$(echo "$staged" | wc -l | tr -d ' ')
-            echo -e "  ${GREEN}▶ Staged${NC} ${DIM}($cnt files)${NC}"
-            echo "$staged" | head -3 | while read -r file; do
-                echo -e "    ${DIM}•${NC} $file"
-            done
-            [ "$cnt" -gt 3 ] && echo -e "    ${DIM}+$((cnt-3)) more files${NC}"
+            local files=$(echo "$staged" | head -2 | tr '\n' ' ')
+            echo -e "${GREEN}▶${NC} Staged($cnt): ${DIM}${files}${NC}$([ "$cnt" -gt 2 ] && echo "...")"
         fi
 
         if [ -n "$unstaged" ]; then
             local cnt=$(echo "$unstaged" | wc -l | tr -d ' ')
-            echo -e "  ${YELLOW}▷ Modified${NC} ${DIM}($cnt files)${NC}"
-            echo "$unstaged" | head -3 | while read -r file; do
-                echo -e "    ${DIM}•${NC} $file"
-            done
-            [ "$cnt" -gt 3 ] && echo -e "    ${DIM}+$((cnt-3)) more files${NC}"
+            local files=$(echo "$unstaged" | head -2 | tr '\n' ' ')
+            echo -e "${YELLOW}▷${NC} Modified($cnt): ${DIM}${files}${NC}$([ "$cnt" -gt 2 ] && echo "...")"
         fi
 
         if [ -n "$untracked" ]; then
             local cnt=$(echo "$untracked" | wc -l | tr -d ' ')
-            echo -e "  ${RED}▸ Untracked${NC} ${DIM}($cnt files)${NC}"
-            echo "$untracked" | head -3 | while read -r file; do
-                echo -e "    ${DIM}•${NC} $file"
-            done
-            [ "$cnt" -gt 3 ] && echo -e "    ${DIM}+$((cnt-3)) more files${NC}"
+            local files=$(echo "$untracked" | head -2 | tr '\n' ' ')
+            echo -e "${RED}▸${NC} Untracked($cnt): ${DIM}${files}${NC}$([ "$cnt" -gt 2 ] && echo "...")"
         fi
     else
-        echo -e "  ${GREEN}✓${NC} Working tree clean"
+        echo -e "${GREEN}✓${NC} Working tree clean"
     fi
 
     echo ""
