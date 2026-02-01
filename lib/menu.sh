@@ -44,8 +44,7 @@ show_help() {
     echo -e "${CYAN}Branch Naming:${NC}"
     echo -e "  Temporary: test/, temp/, debug/, exp/"
     echo -e "  Feature:   feat/, fix/, refactor/, docs/"
-    echo ""
-    read -e -r -p "Press Enter to continue..."
+    wait_for_key
 }
 
 # Main interactive loop
@@ -76,12 +75,12 @@ main_loop() {
             r|R) continue ;;
             q|Q) echo -e "\n${DIM}Goodbye! 👋${NC}\n"; exit 0 ;;
             \?|h|H) show_help ;;
-            *) echo -e "${YELLOW}Invalid: '$choice'${NC}"; sleep 0.3 ;;
+            *) echo -e "${YELLOW}Invalid: '$choice'${NC}"; sleep 0.5 ;;
         esac
 
-        if [[ ! "$choice" =~ ^[7rRqQ\?hH]$ ]]; then
-            echo ""
-            read -e -r -p "Press Enter to continue..."
+        # Auto-refresh for most actions (except log, diff, help which handle their own pausing)
+        if [[ ! "$choice" =~ ^[78rRqQ\?hH]$ ]]; then
+            auto_refresh
         fi
     done
 }

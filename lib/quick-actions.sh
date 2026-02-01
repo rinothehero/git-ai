@@ -98,8 +98,7 @@ action_switch_branch() {
 action_show_log() {
     echo -e "\n${CYAN}📜 Git Log (recent 15):${NC}\n"
     git log --oneline --graph --decorate -15
-    echo ""
-    read -e -r -p "Press Enter to continue..."
+    wait_for_key
 }
 
 # Show diff
@@ -122,8 +121,7 @@ action_show_diff() {
     else
         echo -e "${DIM}No changes${NC}"
     fi
-    echo ""
-    read -e -r -p "Press Enter to continue..."
+    wait_for_key
 }
 
 # Push to remote
