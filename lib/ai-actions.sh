@@ -31,16 +31,18 @@ Confirm you understood the project with a brief summary (2-3 sentences) in Korea
 
     local response=$($GEMINI_CMD --prompt "$prompt" 2>&1)
 
-    # Extract session ID
-    local sid=$(echo "$response" | grep -oE 'Session [0-9]+' | head -1 | grep -oE '[0-9]+')
+    # Extract session ID from session list (most recent)
+    local sid=$($GEMINI_CMD --list-sessions 2>&1 | grep -m 1 '^\s*[0-9]\+\.' | grep -oE '\[[0-9a-f-]{36}\]' | tr -d '[]')
 
     if [ -n "$sid" ]; then
         echo "$sid" > "$SESSION_FILE"
-        echo -e "${GREEN}✅ Session #$sid created${NC}\n"
-        # Show AI response (skip first lines with session info)
-        echo "$response" | tail -n +3
+        echo -e "${GREEN}✅ Session created${NC}"
+        echo -e "${DIM}Session ID: $sid${NC}\n"
+        # Show AI response (filter out debug lines)
+        echo "$response" | grep -v "^Loaded cached credentials" | grep -v "^Hook registry"
     else
         echo -e "${RED}❌ Failed to create session${NC}"
+        echo -e "${YELLOW}Tip: Check if Gemini CLI is properly configured${NC}"
         echo "$response"
     fi
 }

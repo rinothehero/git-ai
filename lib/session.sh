@@ -6,8 +6,9 @@
 # Get current session ID
 get_session_id() {
     if [ -f "$SESSION_FILE" ]; then
-        local sid=$(cat "$SESSION_FILE" 2>/dev/null)
-        if [[ "$sid" =~ ^[0-9]+$ ]]; then
+        local sid=$(cat "$SESSION_FILE" 2>/dev/null | tr -d '[:space:]')
+        # Accept both UUID format and numeric ID
+        if [[ "$sid" =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$ ]] || [[ "$sid" =~ ^[0-9]+$ ]]; then
             echo "$sid"
         else
             rm -f "$SESSION_FILE"
