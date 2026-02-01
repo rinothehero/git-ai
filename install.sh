@@ -2,6 +2,12 @@
 # ==============================================================================
 # Git-AI Manager - Installation Script
 # ==============================================================================
+#
+# Usage:
+#   ./install.sh              # Install git-ai
+#   ./install.sh --uninstall  # Uninstall git-ai
+#
+# ==============================================================================
 
 set -e
 
@@ -14,7 +20,103 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 BOLD='\033[1m'
+DIM='\033[2m'
 NC='\033[0m'
+
+# ==============================================================================
+# Uninstall Function
+# ==============================================================================
+
+uninstall_git_ai() {
+    echo -e "${CYAN}"
+    echo "╔══════════════════════════════════════════════════════════════╗"
+    echo "║          🗑️  Git-AI Manager - Uninstaller                   ║"
+    echo "╚══════════════════════════════════════════════════════════════╝"
+    echo -e "${NC}\n"
+
+    # Check if git-ai is installed
+    if [ ! -L "$INSTALL_DIR/git-ai" ] && [ ! -f "$INSTALL_DIR/git-ai" ]; then
+        echo -e "${YELLOW}⚠️  git-ai is not installed in $INSTALL_DIR${NC}"
+        echo ""
+
+        # Check other common locations
+        local found=false
+        for dir in /usr/local/bin /usr/bin "$HOME/.local/bin"; do
+            if [ -L "$dir/git-ai" ] || [ -f "$dir/git-ai" ]; then
+                echo -e "Found git-ai in: ${CYAN}$dir/git-ai${NC}"
+                INSTALL_DIR="$dir"
+                found=true
+                break
+            fi
+        done
+
+        if [ "$found" = false ]; then
+            echo -e "${RED}❌ git-ai not found${NC}"
+            exit 1
+        fi
+    fi
+
+    # Show what will be removed
+    echo -e "${BOLD}The following will be removed:${NC}"
+    echo -e "  ${RED}✗${NC} $INSTALL_DIR/git-ai"
+
+    if [ -L "$INSTALL_DIR/git-ai" ]; then
+        local target=$(readlink "$INSTALL_DIR/git-ai")
+        echo -e "    ${DIM}(symlink to: $target)${NC}"
+    fi
+
+    echo ""
+    read -e -r -p "Continue with uninstallation? (y/n): " confirm
+
+    if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+        echo -e "${DIM}Cancelled${NC}"
+        exit 0
+    fi
+
+    # Determine if sudo is needed
+    local NEEDS_SUDO=false
+    if [ "$INSTALL_DIR" = "/usr/local/bin" ] || [ "$INSTALL_DIR" = "/usr/bin" ]; then
+        NEEDS_SUDO=true
+    fi
+
+    # Remove git-ai
+    echo ""
+    echo -e "${BOLD}Removing git-ai...${NC}"
+
+    if [ "$NEEDS_SUDO" = true ]; then
+        sudo rm -f "$INSTALL_DIR/git-ai"
+    else
+        rm -f "$INSTALL_DIR/git-ai"
+    fi
+
+    # Verify removal
+    if command -v git-ai &> /dev/null; then
+        echo -e "${YELLOW}⚠️  git-ai command still found in PATH${NC}"
+        echo -e "   Check other installations: ${CYAN}which git-ai${NC}"
+    else
+        echo -e "  ${GREEN}✓${NC} git-ai removed"
+    fi
+
+    echo ""
+    echo -e "${GREEN}╔═══════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${GREEN}║              ✅ Uninstallation Complete!                  ║${NC}"
+    echo -e "${GREEN}╚═══════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${DIM}The git-ai repository has not been deleted.${NC}"
+    echo -e "${DIM}To reinstall, run: ${CYAN}./install.sh${NC}"
+    echo ""
+
+    exit 0
+}
+
+# Check for uninstall flag
+if [[ "$1" == "--uninstall" || "$1" == "-u" ]]; then
+    uninstall_git_ai
+fi
+
+# ==============================================================================
+# Install
+# ==============================================================================
 
 echo -e "${CYAN}"
 echo "╔══════════════════════════════════════════════════════════════╗"
@@ -140,6 +242,6 @@ fi
 # ==============================================================================
 
 echo -e "${DIM}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${DIM}To uninstall: ${NC}${CYAN}rm $INSTALL_DIR/git-ai${NC}"
+echo -e "${DIM}To uninstall: ${NC}${CYAN}./install.sh --uninstall${NC} ${DIM}or${NC} ${CYAN}rm $INSTALL_DIR/git-ai${NC}"
 echo -e "${DIM}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""

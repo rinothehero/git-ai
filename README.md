@@ -63,6 +63,19 @@ npm install -g @google/gemini-cli
 brew install gemini-cli
 ```
 
+### Uninstall
+
+```bash
+# Using the installer script
+cd git-ai
+./install.sh --uninstall
+
+# Or manually
+rm /usr/local/bin/git-ai
+# or for user install
+rm ~/.local/bin/git-ai
+```
+
 ## 🚀 Usage
 
 ### Interactive Mode (Recommended)
