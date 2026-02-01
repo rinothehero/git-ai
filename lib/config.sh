@@ -82,23 +82,3 @@ DBOX_VL="╣"
 DBOX_HU="╩"
 DBOX_HD="╦"
 DBOX_VH="╬"
-
-# Menu configuration
-MENU_ITEMS=(
-    "1:Stage All:action_stage_all:quick"
-    "2:Unstage:action_unstage_all:quick"
-    "3:Uncommit:action_uncommit:quick"
-    "4:Stash:action_stash_menu:quick"
-    "5:Branch:action_switch_branch:quick"
-    "6:Push:action_push:quick"
-    "7:Log:action_show_log:quick"
-    "8:Diff:action_show_diff:quick"
-    "9:Discard:action_discard_changes:quick"
-    "i:Init AI:action_init:ai"
-    "c:AI Commit:action_ai_commit:ai"
-    "v:Review:action_ai_review:ai"
-    "f:Finish:action_finish:workflow"
-    "r:Refresh::system"
-    "q:Quit::system"
-    "?:Help:show_help:system"
-)

@@ -3,45 +3,28 @@
 # Git-AI Manager - Menu & Main Loop Module
 # ==============================================================================
 
-# Menu items configuration
-declare -a MENU_KEYS=("1" "2" "3" "4" "5" "6" "7" "8" "9" "i" "c" "v" "f" "r" "q" "?")
-declare -A MENU_LABELS=(
-    ["1"]="Stage All"
-    ["2"]="Unstage"
-    ["3"]="Uncommit"
-    ["4"]="Stash 📋"
-    ["5"]="Branch"
-    ["6"]="Push"
-    ["7"]="Log"
-    ["8"]="Diff"
-    ["9"]="Discard"
-    ["i"]="Init AI"
-    ["c"]="AI Commit"
-    ["v"]="Review"
-    ["f"]="Finish"
-    ["r"]="Refresh"
-    ["q"]="Quit"
-    ["?"]="Help"
-)
-
-declare -A MENU_CATEGORIES=(
-    ["1"]="quick"
-    ["2"]="quick"
-    ["3"]="quick"
-    ["4"]="tools"
-    ["5"]="tools"
-    ["6"]="tools"
-    ["7"]="tools"
-    ["8"]="tools"
-    ["9"]="danger"
-    ["i"]="ai"
-    ["c"]="ai"
-    ["v"]="ai"
-    ["f"]="workflow"
-    ["r"]="system"
-    ["q"]="system"
-    ["?"]="system"
-)
+# Get menu label for key
+get_menu_label() {
+    case "$1" in
+        "1") echo "Stage All" ;;
+        "2") echo "Unstage" ;;
+        "3") echo "Uncommit" ;;
+        "4") echo "Stash 📋" ;;
+        "5") echo "Branch" ;;
+        "6") echo "Push" ;;
+        "7") echo "Log" ;;
+        "8") echo "Diff" ;;
+        "9") echo "Discard" ;;
+        "i") echo "Init AI" ;;
+        "c") echo "AI Commit" ;;
+        "v") echo "Review" ;;
+        "f") echo "Finish" ;;
+        "r") echo "Refresh" ;;
+        "q") echo "Quit" ;;
+        "?") echo "Help" ;;
+        *) echo "" ;;
+    esac
+}
 
 # Show interactive menu with navigation
 show_menu() {
@@ -57,7 +40,7 @@ show_menu() {
     echo -n "  ${BOX_V} "
     for idx in "${!row1_items[@]}"; do
         local key="${row1_items[$idx]}"
-        local label="${MENU_LABELS[$key]}"
+        local label=$(get_menu_label "$key")
         local display="[$key] $label"
 
         if [ "$selected" -eq "$((idx))" ]; then
@@ -91,7 +74,7 @@ show_menu() {
             [ "$idx" -eq 5 ] && echo -n "           "
             continue
         fi
-        local label="${MENU_LABELS[$key]}"
+        local label=$(get_menu_label "$key")
         local display="[$key] $label"
 
         if [ "$selected" -eq "$((6 + idx))" ]; then
@@ -122,7 +105,7 @@ show_menu() {
             [ "$idx" -eq 5 ] && echo -n "           "
             continue
         fi
-        local label="${MENU_LABELS[$key]}"
+        local label=$(get_menu_label "$key")
         local display="[$key] $label"
 
         # Highlight dangerous actions
@@ -158,7 +141,7 @@ show_menu() {
     local bottom_items=("r" "q" "?")
     for idx in "${!bottom_items[@]}"; do
         local key="${bottom_items[$idx]}"
-        local label="${MENU_LABELS[$key]}"
+        local label=$(get_menu_label "$key")
         local display="[$key] $label"
 
         if [ "$selected" -eq "$((18 + idx))" ]; then
