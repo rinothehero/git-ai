@@ -32,7 +32,7 @@ Confirm you understood the project with a brief summary (2-3 sentences) in Korea
     local response=$($GEMINI_CMD --prompt "$prompt" 2>&1)
 
     # Extract session ID from session list (most recent)
-    local sid=$($GEMINI_CMD --list-sessions 2>&1 | grep -m 1 '^\s*[0-9]\+\.' | grep -oE '\[[0-9a-f-]{36}\]' | tr -d '[]')
+    local sid=$($GEMINI_CMD --list-sessions 2>&1 | grep '^\s*[0-9]\+\.' | tail -1 | grep -oE '\[[0-9a-f-]{36}\]' | tr -d '[]')
 
     if [ -n "$sid" ]; then
         echo "$sid" > "$SESSION_FILE"
