@@ -128,29 +128,18 @@ get_short_session_id() {
 # Read arrow key input
 read_arrow_key() {
     local key
-    local key2
-    local key3
+    local extra
 
     # Read first character
     IFS= read -rsn1 key 2>/dev/null
 
-    # If it's ESC (0x1b), read the next two characters
+    # If it's ESC (0x1b), drain the rest of the escape sequence
     if [[ $key == $'\x1b' ]]; then
-        # Read [ character
-        IFS= read -rsn1 -t 0.5 key2 2>/dev/null
-
-        # If we got [, read the direction character
-        if [[ $key2 == '[' ]]; then
-            IFS= read -rsn1 -t 0.5 key3 2>/dev/null
-            case $key3 in
-                'A') echo "up"; return ;;
-                'B') echo "down"; return ;;
-                'C') echo "right"; return ;;
-                'D') echo "left"; return ;;
-            esac
-        fi
-
-        # Incomplete escape sequence - return empty
+        # Drain any remaining characters from the escape sequence
+        while IFS= read -rsn1 -t 0.001 extra 2>/dev/null; do
+            :  # Just drain it
+        done
+        # Return empty to ignore escape sequences (arrow keys not supported on this platform)
         echo ""
         return
     fi
