@@ -15,9 +15,10 @@ show_status() {
     # Header line: Session | Branch | Type
     local session_display=""
     if [ -n "$sid" ]; then
-        session_display="${GREEN}●${NC} Session #$sid"
+        local short_sid="${sid:0:8}"
+        session_display="${GREEN}●${NC} Session ${DIM}#${short_sid}${NC}"
     else
-        session_display="${RED}○${NC} No Session"
+        session_display="${RED}○${NC} ${DIM}No Session${NC}"
     fi
 
     local type_display=""
@@ -54,33 +55,34 @@ show_status() {
     local untracked=$(git ls-files --others --exclude-standard 2>/dev/null | head -5)
 
     if [ -n "$staged" ] || [ -n "$unstaged" ] || [ -n "$untracked" ]; then
-        echo -e "  ${BOLD}Changes${NC}"
-
         if [ -n "$staged" ]; then
             local cnt=$(echo "$staged" | wc -l | tr -d ' ')
-            echo -ne "  ${GREEN}▶ Staged ($cnt):${NC} "
-            echo "$staged" | head -3 | tr '\n' ' '
-            [ "$cnt" -gt 3 ] && echo -ne "${DIM}+$((cnt-3)) more${NC}"
-            echo ""
+            echo -e "  ${GREEN}▶ Staged${NC} ${DIM}($cnt files)${NC}"
+            echo "$staged" | head -3 | while read -r file; do
+                echo -e "    ${DIM}•${NC} $file"
+            done
+            [ "$cnt" -gt 3 ] && echo -e "    ${DIM}+$((cnt-3)) more files${NC}"
         fi
 
         if [ -n "$unstaged" ]; then
             local cnt=$(echo "$unstaged" | wc -l | tr -d ' ')
-            echo -ne "  ${YELLOW}▷ Modified ($cnt):${NC} "
-            echo "$unstaged" | head -3 | tr '\n' ' '
-            [ "$cnt" -gt 3 ] && echo -ne "${DIM}+$((cnt-3)) more${NC}"
-            echo ""
+            echo -e "  ${YELLOW}▷ Modified${NC} ${DIM}($cnt files)${NC}"
+            echo "$unstaged" | head -3 | while read -r file; do
+                echo -e "    ${DIM}•${NC} $file"
+            done
+            [ "$cnt" -gt 3 ] && echo -e "    ${DIM}+$((cnt-3)) more files${NC}"
         fi
 
         if [ -n "$untracked" ]; then
             local cnt=$(echo "$untracked" | wc -l | tr -d ' ')
-            echo -ne "  ${RED}▸ Untracked ($cnt):${NC} "
-            echo "$untracked" | head -3 | tr '\n' ' '
-            [ "$cnt" -gt 3 ] && echo -ne "${DIM}+$((cnt-3)) more${NC}"
-            echo ""
+            echo -e "  ${RED}▸ Untracked${NC} ${DIM}($cnt files)${NC}"
+            echo "$untracked" | head -3 | while read -r file; do
+                echo -e "    ${DIM}•${NC} $file"
+            done
+            [ "$cnt" -gt 3 ] && echo -e "    ${DIM}+$((cnt-3)) more files${NC}"
         fi
     else
-        echo -e "  ${DIM}✓ Working tree clean${NC}"
+        echo -e "  ${GREEN}✓${NC} Working tree clean"
     fi
 
     echo ""

@@ -62,3 +62,86 @@ wait_for_key() {
     read -n 1 -s -r -p "$message"
     echo ""
 }
+
+# Show error box with message
+show_error_box() {
+    local title="${1:-ERROR}"
+    local message="${2:-An error occurred}"
+    local tips="${3:-}"
+
+    echo ""
+    echo -e "${RED}${DBOX_TL}${DBOX_H} $title ${DBOX_H}$(printf '═%.0s' {1..50})${DBOX_TR}${NC}"
+    echo -e "${RED}${DBOX_V}${NC} ${BOLD}${message}${NC}"
+
+    if [ -n "$tips" ]; then
+        echo -e "${RED}${DBOX_V}${NC}"
+        echo -e "${RED}${DBOX_V}${NC} ${DIM}Tip:${NC}"
+        while IFS= read -r tip_line; do
+            echo -e "${RED}${DBOX_V}${NC}  • $tip_line"
+        done <<< "$tips"
+    fi
+
+    echo -e "${RED}${DBOX_BL}$(printf '═%.0s' {1..60})${DBOX_BR}${NC}"
+    echo ""
+}
+
+# Show info box
+show_info_box() {
+    local title="${1:-INFO}"
+    local content="${2}"
+
+    echo ""
+    echo -e "${CYAN}${DBOX_TL}${DBOX_H} $title ${DBOX_H}$(printf '═%.0s' {1..50})${DBOX_TR}${NC}"
+
+    while IFS= read -r line; do
+        echo -e "${CYAN}${DBOX_V}${NC} $line"
+    done <<< "$content"
+
+    echo -e "${CYAN}${DBOX_BL}$(printf '═%.0s' {1..60})${DBOX_BR}${NC}"
+    echo ""
+}
+
+# Spinner animation (background job support)
+spinner() {
+    local pid=$1
+    local message="${2:-Processing...}"
+    local spinstr='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+    local delay=0.1
+
+    while kill -0 $pid 2>/dev/null; do
+        local temp=${spinstr#?}
+        printf "\r${CYAN}%s${NC} %s" "${spinstr:0:1}" "$message"
+        spinstr=$temp${spinstr%"$temp"}
+        sleep $delay
+    done
+    printf "\r%*s\r" $((${#message} + 5)) ""
+}
+
+# Get short session ID (first 8 chars)
+get_short_session_id() {
+    local sid=$(get_session_id)
+    if [ -n "$sid" ]; then
+        echo "${sid:0:8}"
+    fi
+}
+
+# Read arrow key input
+read_arrow_key() {
+    local key
+    read -rsn1 key 2>/dev/null
+
+    if [[ $key == $'\x1b' ]]; then
+        read -rsn2 -t 0.1 key 2>/dev/null
+        case $key in
+            '[A') echo "up" ;;
+            '[B') echo "down" ;;
+            '[C') echo "right" ;;
+            '[D') echo "left" ;;
+            *) echo "" ;;
+        esac
+    elif [[ $key == "" ]]; then
+        echo "enter"
+    else
+        echo "$key"
+    fi
+}

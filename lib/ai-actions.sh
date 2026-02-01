@@ -37,13 +37,15 @@ Confirm you understood the project with a brief summary (2-3 sentences) in Korea
     if [ -n "$sid" ]; then
         echo "$sid" > "$SESSION_FILE"
         echo -e "${GREEN}✅ Session created${NC}"
-        echo -e "${DIM}Session ID: $sid${NC}\n"
+        echo -e "${DIM}Session ID: ${sid:0:8}...${NC}\n"
         # Show AI response (filter out debug lines)
         echo "$response" | grep -v "^Loaded cached credentials" | grep -v "^Hook registry"
     else
-        echo -e "${RED}❌ Failed to create session${NC}"
-        echo -e "${YELLOW}Tip: Check if Gemini CLI is properly configured${NC}"
+        show_error_box "SESSION FAILED" "Failed to create AI session" "Check if Gemini CLI is installed: gemini --version\nAuthenticate if needed: gemini auth\nCheck network connection"
+        echo -e "\n${DIM}Raw output:${NC}"
         echo "$response"
+        sleep 1
+        return 1
     fi
 }
 
@@ -52,7 +54,8 @@ action_ai_review() {
     local sid=$(get_session_id)
 
     if [ -z "$sid" ]; then
-        echo -e "${YELLOW}⚠️ No AI session. Run Init first.${NC}"
+        show_error_box "NO SESSION" "No active AI session" "Use [i] Init AI to create a session first"
+        sleep 1
         return 1
     fi
 
@@ -60,7 +63,7 @@ action_ai_review() {
     [ -z "$diff" ] && diff=$(git diff 2>/dev/null)
 
     if [ -z "$diff" ]; then
-        echo -e "${YELLOW}⚠️ No changes to review${NC}"
+        show_warning "No changes to review" 1
         return 1
     fi
 
@@ -93,13 +96,14 @@ action_ai_commit() {
     local sid=$(get_session_id)
 
     if [ -z "$sid" ]; then
-        echo -e "${YELLOW}⚠️ No AI session. Run Init first.${NC}"
+        show_error_box "NO SESSION" "No active AI session" "Use [i] Init AI to create a session first"
+        sleep 1
         return 1
     fi
 
     local staged=$(git diff --cached --name-only 2>/dev/null)
     if [ -z "$staged" ]; then
-        echo -e "${YELLOW}⚠️ No staged changes. Stage files first.${NC}"
+        show_warning "No staged changes - use [1] Stage All first" 1
         return 1
     fi
 
@@ -144,8 +148,9 @@ except:
 " <<< "$response")
 
     if [[ "$parsed" == "PARSE_ERROR" ]]; then
-        echo -e "${RED}❌ Failed to parse AI response${NC}"
-        echo -e "${DIM}Raw response:${NC}\n$response"
+        show_error_box "PARSE ERROR" "Failed to parse AI response" "AI returned invalid JSON format\nTry again or check your session"
+        echo -e "\n${DIM}Raw response:${NC}\n$response"
+        sleep 1.5
         return 1
     fi
 
@@ -272,7 +277,7 @@ except:
 " <<< "$response")
 
             if [[ "$parsed" == "PARSE_ERROR" ]]; then
-                echo -e "${RED}❌ Failed to parse AI response${NC}"
+                show_warning "Failed to parse AI response - cancelling" 1
                 break
             fi
 

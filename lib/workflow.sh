@@ -11,7 +11,8 @@ action_finish() {
 
     # Can't finish on main
     if [ "$branch_type" == "main" ]; then
-        echo -e "${RED}❌ Cannot finish on main branch${NC}"
+        show_error_box "CANNOT FINISH" "Cannot finish workflow on main branch" "Create a feature or test branch first\nUse [5] Branch to create a new branch"
+        sleep 1.5
         return 1
     fi
 
