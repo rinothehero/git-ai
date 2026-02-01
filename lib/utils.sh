@@ -128,16 +128,20 @@ get_short_session_id() {
 # Read arrow key input
 read_arrow_key() {
     local key
-    read -rsn1 key 2>/dev/null
+    IFS= read -rsn1 key 2>/dev/null
 
     if [[ $key == $'\x1b' ]]; then
-        read -rsn2 -t 0.1 key 2>/dev/null
+        # Read the rest of escape sequence with longer timeout
+        IFS= read -rsn2 -t 0.3 key 2>/dev/null
         case $key in
             '[A') echo "up" ;;
             '[B') echo "down" ;;
             '[C') echo "right" ;;
             '[D') echo "left" ;;
-            *) echo "" ;;
+            *)
+                # Incomplete escape sequence - ignore it
+                echo ""
+                ;;
         esac
     elif [[ $key == "" ]]; then
         echo "enter"
