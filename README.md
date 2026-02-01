@@ -14,40 +14,51 @@ AI-powered Git workflow automation using Google Gemini CLI.
 - **Visual Git Graph** - See your repository structure at a glance
 - **Stash Management** - Full stash submenu with save/pop/apply/drop/clear
 - **Context Persistence** - AI remembers your project context across sessions
+- **Modular Architecture** - Clean, maintainable codebase with separated modules
 
 ## 📦 Installation
 
-### Quick Install (curl)
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/git-ai/main/install.sh | bash
-```
-
-### Manual Install
-
-```bash
-# Clone the repository
-git clone https://github.com/YOUR_USERNAME/git-ai.git
-
-# Make executable and add to PATH
-chmod +x git-ai/git-ai
-sudo ln -s $(pwd)/git-ai/git-ai /usr/local/bin/git-ai
-
-# Or copy to your bin directory
-cp git-ai/git-ai ~/.local/bin/
-```
-
-## 🔧 Requirements
+### Prerequisites
 
 - **Git** (2.0+)
 - **Gemini CLI** - [Installation Guide](https://github.com/google-gemini/gemini-cli)
 - **Python 3** (for JSON parsing)
 - **Bash** (5.0+)
 
+### Quick Install
+
+```bash
+# Clone the repository
+git clone https://github.com/rinothehero/git-ai.git
+cd git-ai
+
+# Run installer (creates symlink to /usr/local/bin)
+./install.sh
+
+# Or install to custom location
+INSTALL_DIR="$HOME/.local/bin" ./install.sh
+```
+
+### Manual Install
+
+```bash
+# Clone the repository
+git clone https://github.com/rinothehero/git-ai.git
+cd git-ai
+
+# Create symlink (system-wide)
+sudo ln -sf $(pwd)/git-ai /usr/local/bin/git-ai
+
+# Or user-level install
+mkdir -p ~/.local/bin
+ln -sf $(pwd)/git-ai ~/.local/bin/git-ai
+# Add ~/.local/bin to PATH in ~/.bashrc or ~/.zshrc
+```
+
 ### Installing Gemini CLI
 
 ```bash
-npm install -g @anthropic-ai/gemini-cli
+npm install -g @google/gemini-cli
 # or
 brew install gemini-cli
 ```
@@ -69,6 +80,7 @@ git-ai commit    # AI-assisted commit
 git-ai review    # AI code review
 git-ai finish    # Complete branch workflow
 git-ai status    # Show status (non-interactive)
+git-ai version   # Show version
 git-ai help      # Show help
 ```
 
@@ -91,10 +103,10 @@ Git-AI automatically detects branch types based on prefixes:
    └── git-ai → 'c' (AI Commit)
        └── AI suggests: "This looks experimental, create test/xxx?"
            └── Accept → creates test/xxx branch
-           
+
 2. Work on test/xxx
    └── Make changes, commit with AI
-   
+
 3. Finish testing
    └── git-ai → 'f' (Finish)
        └── "Test result?" → Success
@@ -152,7 +164,7 @@ Git-AI automatically detects branch types based on prefixes:
   └──────────────────────────────────────────────────────────────────────┘
 
   Changes
-  ▶ Staged (2): src/main.py src/utils.py 
+  ▶ Staged (2): src/main.py src/utils.py
 
   Quick Actions                          AI Actions ●              Workflow
   ─────────────────────────────────────────────────────────────────────────────
@@ -162,7 +174,27 @@ Git-AI automatically detects branch types based on prefixes:
   ─────────────────────────────────────────────────────────────────────────────
    r Refresh     q Quit       ? Help
 
-  Select: 
+  Select:
+```
+
+## 🏗️ Architecture
+
+Git-AI uses a modular architecture for better maintainability:
+
+```
+git-ai/
+├── git-ai                    # Main entry point (74 lines)
+└── lib/
+    ├── config.sh            # Configuration & colors
+    ├── utils.sh             # Utility functions
+    ├── session.sh           # Session management
+    ├── branch.sh            # Branch utilities
+    ├── status.sh            # Status display
+    ├── quick-actions.sh     # Quick git actions
+    ├── stash.sh             # Stash management
+    ├── ai-actions.sh        # AI-powered actions
+    ├── workflow.sh          # Workflow management
+    └── menu.sh              # Menu & main loop
 ```
 
 ## ⚙️ Configuration
@@ -177,7 +209,32 @@ Git-AI stores session data in your `.git` directory:
 ```bash
 # Custom Gemini command (default: gemini)
 export GEMINI_CMD="gemini"
+
+# Custom installation directory (default: /usr/local/bin)
+export INSTALL_DIR="$HOME/.local/bin"
 ```
+
+## 🔧 Troubleshooting
+
+### "gemini: command not found"
+
+Install Gemini CLI:
+```bash
+npm install -g @google/gemini-cli
+```
+
+### "git-ai: command not found"
+
+Ensure installation directory is in PATH:
+```bash
+# For ~/.local/bin
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### Symlink not working
+
+The installer creates a symlink. Git-AI automatically resolves symlinks to find the `lib/` directory. If you move the repository, re-run the installer.
 
 ## 🤝 Contributing
 
